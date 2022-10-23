@@ -13,15 +13,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Observable;
+import java.util.concurrent.Flow;
 import java.util.stream.Stream;
 
 /**
  * Created by Riccardo on 12/08/16.
  */
 
-public class ContinuousQueryExecutionImpl<I, W, R, O> extends ContinuousQueryExecutionObserver<I, W, R, O> {
+public class ContinuousQueryExecutionSubscriberImpl<I, W, R, O> extends ContinuousQueryExecutionSubscriber<I, W, R, O> {
 
-    private static final Logger log = Logger.getLogger(ContinuousQueryExecutionImpl.class);
+    private static final Logger log = Logger.getLogger(ContinuousQueryExecutionSubscriberImpl.class);
     private final RelationToStreamOperator<R, O> r2s;
     private final RelationToRelationOperator<W, R> r2r;
     private final SDS<W> sds;
@@ -29,7 +30,9 @@ public class ContinuousQueryExecutionImpl<I, W, R, O> extends ContinuousQueryExe
     private final DataStream<O> outstream;
     private List<StreamToRelationOp<I, W>> s2rs;
 
-    public ContinuousQueryExecutionImpl(SDS sds, ContinuousQuery query, DataStream<O> outstream, RelationToRelationOperator<W, R> r2r, RelationToStreamOperator<R, O> r2s, StreamToRelationOp<I, W>... s2rs) {
+    private Flow.Subscription subscription;
+
+    public ContinuousQueryExecutionSubscriberImpl(SDS sds, ContinuousQuery query, DataStream<O> outstream, RelationToRelationOperator<W, R> r2r, RelationToStreamOperator<R, O> r2s, StreamToRelationOp<I, W>... s2rs) {
         super(sds, query);
         this.s2rs = Arrays.asList(s2rs);
         this.query = query;
@@ -80,16 +83,39 @@ public class ContinuousQueryExecutionImpl<I, W, R, O> extends ContinuousQueryExe
         op.link(this);
     }
 
-    @Override
-    public void update(Observable o, Object arg) {
-        Long now = (Long) arg;
-        r2s.eval(eval(now), now).forEach(o1 -> outstream().put(o1, now));
-    }
+//    @Override
+//    public void update(Observable o, Object arg) {
+//        Long now = (Long) arg;
+//        r2s.eval(eval(now), now).forEach(o1 -> outstream().put(o1, now));
+//    }
 
     @Override
     public Stream<R> eval(Long now) {
         sds.materialize(now);
         return r2r.eval(sds.toStream());
+    }
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        System.out.println(this + "  subscribed to subscription " + subscription);
+        this.subscription = subscription;
+    }
+
+    @Override
+    public void onNext(Object o) {
+        System.out.println(this + "  processed next bit of data");
+//        subscription.request(1);
+
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        System.out.println(this + " threw an error");
+    }
+
+    @Override
+    public void onComplete() {
+        System.out.println(this + " completed");
     }
 }
 

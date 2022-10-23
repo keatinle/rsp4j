@@ -51,6 +51,10 @@ public class SimpleRSPQLQuery<O> implements RSPQL<O> {
         List<TripleHolder> triplesTemp = new ArrayList<>();
         TripleHolder triple = new TripleHolder(s,p,o);
         triplesTemp.add(triple);
+
+        this.triples = new HashMap<>();
+        this.windowsToFilters = new HashMap<>();
+
         triples.put(win.iri(),triplesTemp);
         if (win != null && stream != null) {
             windowMap.put(win, stream);

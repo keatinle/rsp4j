@@ -19,7 +19,7 @@ import org.streamreasoning.rsp4j.yasper.querying.operators.Dstream;
 import org.streamreasoning.rsp4j.yasper.querying.operators.Istream;
 import org.streamreasoning.rsp4j.yasper.querying.operators.Rstream;
 import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.Binding;
-import org.streamreasoning.rsp4j.yasper.querying.operators.windowing.CSPARQLStreamToRelationOp;
+import org.streamreasoning.rsp4j.yasper.querying.operators.windowing.CSPARQLFlowStreamToRelationOp;
 
 public class QueryTaskOperatorAPIImpl extends TaskOperatorAPIImpl<Graph, Graph, Binding, Binding> {
 
@@ -50,7 +50,7 @@ public class QueryTaskOperatorAPIImpl extends TaskOperatorAPIImpl<Graph, Graph, 
                     .forEach(
                             entry -> {
                                 StreamToRelationOp<Graph, Graph> s2r =
-                                        new CSPARQLStreamToRelationOp<Graph, Graph>(
+                                        new CSPARQLFlowStreamToRelationOp<>(
                                                 RDFUtils.createIRI(entry.getKey().iri()),
                                                 entry.getKey().getRange(),
                                                 entry.getKey().getStep(),

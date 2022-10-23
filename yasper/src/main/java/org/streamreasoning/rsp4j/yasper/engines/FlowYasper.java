@@ -20,6 +20,7 @@ import org.streamreasoning.rsp4j.api.secret.time.Time;
 import org.streamreasoning.rsp4j.api.secret.time.TimeImpl;
 import org.streamreasoning.rsp4j.api.stream.data.DataStream;
 import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionObserverImpl;
+import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionSubscriberImpl;
 import org.streamreasoning.rsp4j.yasper.content.BindingContentFactory;
 import org.streamreasoning.rsp4j.yasper.content.GraphContentFactory;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
@@ -34,7 +35,7 @@ import java.util.*;
 import static org.streamreasoning.rsp4j.api.RDFUtils.createIRI;
 
 
-public class Yasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrationFeature<RDFStream, RDFStream> {
+public class FlowYasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrationFeature<RDFStream, RDFStream> {
 
     private final long t0;
     private final String baseUri;
@@ -55,7 +56,7 @@ public class Yasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrati
     private ReportGrain report_grain;
 
 
-    public Yasper(EngineConfiguration rsp_config) throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public FlowYasper(EngineConfiguration rsp_config) throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.rsp_config = rsp_config;
         this.report = rsp_config.getReport();
         this.baseUri = rsp_config.getBaseIRI();
@@ -105,7 +106,7 @@ public class Yasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrati
 
         DataStream<Binding> out = new StreamImpl<Binding>(q.getID());
 
-        ContinuousQueryExecution<Graph, Graph, Binding, Binding> cqe = new ContinuousQueryExecutionObserverImpl<Graph, Graph, Binding, Binding>(sds, q, out, q.r2r(), q.r2s());
+        ContinuousQueryExecution<Graph, Graph, Binding, Binding> cqe = new ContinuousQueryExecutionSubscriberImpl<>(sds, q, out, q.r2r(), q.r2s());
 
         Map<? extends WindowNode, DataStream<Graph>> windowMap = q.getWindowMap();
 
