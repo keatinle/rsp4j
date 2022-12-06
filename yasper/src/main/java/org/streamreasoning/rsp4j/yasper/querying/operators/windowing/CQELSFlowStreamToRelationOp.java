@@ -5,8 +5,6 @@ import org.apache.log4j.Logger;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
 import org.streamreasoning.rsp4j.api.exceptions.OutOfOrderElementException;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.FlowStreamToRelationOp;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.ObservableStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.PublisherStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.StreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.Window;
@@ -155,5 +153,8 @@ public class CQELSFlowStreamToRelationOp<T1, T2> extends PublisherStreamToRelati
         return new TimeVaryingObject(this, iri);
     }
 
+    public void subscribe(Flow.Subscriber subscriber) {
+        this.subscribe(subscriber);
+    }
 }
 

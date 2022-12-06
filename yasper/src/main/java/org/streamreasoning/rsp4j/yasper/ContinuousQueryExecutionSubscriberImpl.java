@@ -12,7 +12,6 @@ import org.streamreasoning.rsp4j.api.stream.data.DataStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Observable;
 import java.util.concurrent.Flow;
 import java.util.stream.Stream;
 
@@ -104,7 +103,7 @@ public class ContinuousQueryExecutionSubscriberImpl<I, W, R, O> extends Continuo
     @Override
     public void onNext(Object o) {
         System.out.println(this + "  processed next bit of data");
-//        subscription.request(1);
+        subscription.request(1);
 
     }
 

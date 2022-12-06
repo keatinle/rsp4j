@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
 import org.streamreasoning.rsp4j.api.exceptions.OutOfOrderElementException;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.ObservableStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.PublisherStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.Window;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.WindowImpl;
@@ -19,10 +18,10 @@ import org.streamreasoning.rsp4j.api.stream.data.DataStream;
 import org.streamreasoning.rsp4j.yasper.sds.TimeVaryingObject;
 
 import java.util.*;
-import java.util.concurrent.Flow;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelationOp<I, W> {
+public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelationOp<I, W> implements Flow.Publisher {
 
     private static final Logger log = Logger.getLogger(CSPARQLFlowStreamToRelationOp.class);
     private final long width, slide;
@@ -31,8 +30,6 @@ public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelati
     private Set<Window> to_evict;
     private long t0;
     private long toi;
-
-    private Flow.Subscriber subscriber;
 
     public CSPARQLFlowStreamToRelationOp(IRI iri, long width, long slide, Time instance, Tick tick, Report report, ReportGrain grain, ContentFactory<I, W> cf) {
         super(iri, instance, tick, report, grain, cf);
@@ -133,10 +130,8 @@ public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelati
         Content<I, W> content = getWindowContent(w);
         time.setAppTime(t_e);
 
-        setVisible(t_e, w, content);
-        subscriber.onNext(content);
-        return content;
-//        return setVisible(t_e, w, content);
+        submit(t_e);
+        return setVisible(t_e, w, content);
     }
 
     private Content<I, W> getWindowContent(Window w) {
@@ -145,9 +140,8 @@ public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelati
 
     @Override
     public CSPARQLFlowStreamToRelationOp<I, W> link(ContinuousQueryExecution<I, W, ?, ?> context) {
-//        this.addObserver((Observer) context);
-        this.subscriber = (Flow.Subscriber) context;
-        this.subscribe((Flow.Subscriber<? super Content<I, W>>) context);
+        Flow.Subscriber castContext = (Flow.Subscriber<? super Content<I, W>>) context;
+        this.subscribe(castContext);
 
         return this;
     }
@@ -163,6 +157,5 @@ public class CSPARQLFlowStreamToRelationOp<I, W> extends PublisherStreamToRelati
     public TimeVarying<W> get() {
         return new TimeVaryingObject<>(this, iri);
     }
-
 
 }

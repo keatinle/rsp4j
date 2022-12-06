@@ -19,7 +19,6 @@ import org.streamreasoning.rsp4j.api.secret.report.Report;
 import org.streamreasoning.rsp4j.api.secret.time.Time;
 import org.streamreasoning.rsp4j.api.secret.time.TimeImpl;
 import org.streamreasoning.rsp4j.api.stream.data.DataStream;
-import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionObserverImpl;
 import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionSubscriberImpl;
 import org.streamreasoning.rsp4j.yasper.content.BindingContentFactory;
 import org.streamreasoning.rsp4j.yasper.content.GraphContentFactory;

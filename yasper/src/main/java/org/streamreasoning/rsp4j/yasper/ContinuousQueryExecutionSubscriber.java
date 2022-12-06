@@ -1,7 +1,6 @@
 package org.streamreasoning.rsp4j.yasper;
 
 import org.streamreasoning.rsp4j.api.operators.r2s.RelationToStreamOperator;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.HackySubscription;
 import org.streamreasoning.rsp4j.api.querying.ContinuousQuery;
 import org.streamreasoning.rsp4j.api.querying.ContinuousQueryExecution;
 import org.streamreasoning.rsp4j.api.sds.SDS;
@@ -16,7 +15,7 @@ public abstract class ContinuousQueryExecutionSubscriber<I, W, R, O> implements 
     protected ContinuousQuery query;
     protected RelationToStreamOperator s2r;
     protected SDS sds;
-    protected HackySubscription subscription;
+    protected Flow.Subscription subscription;
 
     public ContinuousQueryExecutionSubscriber(SDS sds, ContinuousQuery query) {
         this.query = query;

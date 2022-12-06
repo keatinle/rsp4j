@@ -12,9 +12,10 @@ import org.streamreasoning.rsp4j.api.secret.tick.Ticker;
 import org.streamreasoning.rsp4j.api.secret.tick.secret.TickerFactory;
 import org.streamreasoning.rsp4j.api.secret.time.Time;
 
-import java.util.concurrent.Flow;
+import java.util.List;
+import java.util.concurrent.*;
 
-public abstract class PublisherStreamToRelationOp<E, O> implements Flow.Publisher<Content<E, O>>, StreamToRelationOp<E, O> {
+public abstract class PublisherStreamToRelationOp<E, O> implements StreamToRelationOp<E, O> {
 
     private static final Logger log = Logger.getLogger(PublisherStreamToRelationOp.class);
     protected final Ticker ticker;
@@ -25,7 +26,9 @@ public abstract class PublisherStreamToRelationOp<E, O> implements Flow.Publishe
     protected ReportGrain grain;
     protected Report report;
 
-    private HackySubscription subscription;
+
+    private List<S2RSubscription> subscriptions = new CopyOnWriteArrayList<>();
+    private final ExecutorService executor = ForkJoinPool.commonPool(); // daemon-based
 
     protected PublisherStreamToRelationOp(IRI iri, Time time, Tick tick, Report report, ReportGrain grain, ContentFactory<E, O> cf) {
         this.time = time;
@@ -60,7 +63,6 @@ public abstract class PublisherStreamToRelationOp<E, O> implements Flow.Publishe
 
     protected Content<E, O> setVisible(long t_e, Window w, Content<E, O> c) {
         log.debug("Report [" + w.getO() + "," + w.getC() + ") with Content " + c + "");
-        this.subscription.setTimestamp(t_e);
         return c;
     }
 
@@ -76,9 +78,56 @@ public abstract class PublisherStreamToRelationOp<E, O> implements Flow.Publishe
         return iri != null;
     }
 
-    @Override
-    public void subscribe(Flow.Subscriber<? super Content<E, O>> s) {
-        this.subscription = new HackySubscription(s);
-        s.onSubscribe(subscription);
+    public void submit(Long item) {
+
+        for (S2RSubscription subscription : subscriptions) {
+            if (!subscription.completed && subscription.demand > 0) {
+                subscription.offer(item);
+                subscription.demand -= 1;
+            }
+        }
+    }
+
+    public void subscribe(Flow.Subscriber subscriber) {
+        S2RSubscription subscription = new S2RSubscription(subscriber, executor);
+
+        subscriptions.add(subscription);
+        subscriber.onSubscribe(subscription);
+    }
+
+
+    static class S2RSubscription implements Flow.Subscription {
+        private final Flow.Subscriber subscriber;
+        private final ExecutorService executor;
+        volatile boolean completed = false;
+        volatile int demand = 0;
+
+        S2RSubscription(Flow.Subscriber subscriber,
+                        ExecutorService executor) {
+            this.subscriber = subscriber;
+            this.executor = executor;
+        }
+
+        @Override
+        public void request(long n) {
+            if (n != 0 && !completed) {
+                if (n < 0) {
+                    IllegalArgumentException ex = new IllegalArgumentException();
+                    executor.execute(() -> subscriber.onError(ex));
+                } else {
+                    // just extending the demand
+                    demand += n;
+                }
+            }
+        }
+
+        @Override
+        public void cancel() {
+            completed = true;
+        }
+
+        void offer(Long item) {
+            subscriber.onNext(item);
+        }
     }
 }

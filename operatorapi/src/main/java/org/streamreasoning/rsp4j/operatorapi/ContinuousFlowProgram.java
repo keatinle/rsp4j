@@ -6,7 +6,6 @@ import org.streamreasoning.rsp4j.api.RDFUtils;
 import org.streamreasoning.rsp4j.api.operators.r2r.RelationToRelationOperator;
 import org.streamreasoning.rsp4j.api.operators.r2r.utils.R2RPipe;
 import org.streamreasoning.rsp4j.api.operators.r2s.RelationToStreamOperator;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.HackySubscription;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.StreamToRelationOp;
 import org.streamreasoning.rsp4j.api.querying.ContinuousQuery;
 import org.streamreasoning.rsp4j.api.sds.DataSet;
@@ -94,13 +93,13 @@ public class ContinuousFlowProgram<I, W, R, O> extends ContinuousQueryExecutionS
 
   @Override
   public void onSubscribe(Flow.Subscription subscription) {
-    this.subscription = (HackySubscription) subscription;
-//    subscription.request(1);
+    this.subscription = subscription;
+    subscription.request(1);
   }
 
   @Override
   public void onNext(Object arg) {
-    Long now = this.subscription.getTimestamp();
+    Long now = (Long) arg;
     for (Task<I, W, R, O> task : tasks) {
       Set<R2SContainer<R, O>> r2ss = task.getR2Ss();
       for (R2SContainer<R, O> r2s : r2ss) {
@@ -113,11 +112,13 @@ public class ContinuousFlowProgram<I, W, R, O> extends ContinuousQueryExecutionS
         }
       }
     }
+    subscription.request(1);
   }
 
   @Override
   public void onError(Throwable throwable) {
     log.debug(this + " threw an error");
+    throwable.printStackTrace();
   }
 
   @Override
@@ -125,25 +126,9 @@ public class ContinuousFlowProgram<I, W, R, O> extends ContinuousQueryExecutionS
     log.debug(this + " completed");
   }
 
-//  @Override
-//  public void update(Observable o, Object arg) {
-//    Long now = (Long) arg;
-//    for (Task<I, W, R, O> task : tasks) {
-//      Set<R2SContainer<R, O>> r2ss = task.getR2Ss();
-//      for (R2SContainer<R, O> r2s : r2ss) {
-//        if (task.getAggregations().isEmpty()) {
-//          Stream<R> r2rResult = eval(now);
-//          Stream<O> output = r2s.getR2sOperator().eval(r2rResult, now);
-//          output.forEach(out->{outputStream.put(out,now);});
-//        } else {
-//          handleAggregations(task, r2s, now);
-//        }
-//      }
-//    }
-//  }
-
-  private void handleAggregations(
-          Task<I, W, R, O> task, R2SContainer<R, O> r2s, long timestamp) {
+  private void handleAggregations(Task<I, W, R, O> task,
+                                  R2SContainer<R, O> r2s,
+                                  long timestamp) {
     Set<R> collection = eval(timestamp).collect(Collectors.toSet());
     for (AggregationContainer<R> aggregationContainer : task.getAggregations()) {
       Optional<R> aggregation = evaluateAggregation(collection, aggregationContainer);
