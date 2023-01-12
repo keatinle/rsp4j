@@ -18,7 +18,7 @@ import java.util.List;
  * O represents the variable type of the maintained status, e.g., BAG of RDF Triple, RDF Graph (set) or RELATION
  * */
 
-public interface StreamToRelationOp<I, W> extends Consumer<I> {
+public interface StreamToRelationOp<I, W> extends Consumer<I>  {
 
     Report report();
 
@@ -42,7 +42,7 @@ public interface StreamToRelationOp<I, W> extends Consumer<I> {
 
     Content<I, W> compute(long t_e, Window w);
 
-    StreamToRelationOp<I, W> link(ContinuousQueryExecution<I, W, ?, ?> context);
+    StreamToRelationOp<I, W> subscribe(ContinuousQueryExecution<I, W, ?, ?> subscriber);
 
     TimeVarying<W> apply(DataStream<I> s);
 }

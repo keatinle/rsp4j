@@ -90,7 +90,7 @@ public class EsperGGWindowOperator implements StreamToRelationOp<Graph, Graph> {
     }
 
     @Override
-    public StreamToRelationOp<Graph, Graph> link(ContinuousQueryExecution<Graph, Graph, ?, ?> context) {
+    public StreamToRelationOp<Graph, Graph> subscribe(ContinuousQueryExecution<Graph, Graph, ?, ?> context) {
         throw new UnsupportedOperationException();
     }
 
@@ -146,7 +146,7 @@ public class EsperGGWindowOperator implements StreamToRelationOp<Graph, Graph> {
 
 
         @Override
-        public StreamToRelationOp<Graph, Graph> link(ContinuousQueryExecution<Graph, Graph, ?, ?> context) {
+        public StreamToRelationOp<Graph, Graph> subscribe(ContinuousQueryExecution<Graph, Graph, ?, ?> context) {
             return null;
         }
 

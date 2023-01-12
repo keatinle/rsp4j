@@ -83,8 +83,8 @@ public class MonitoringS2RProxy<I,W> implements StreamToRelationOp<I,W> {
     }
 
     @Override
-    public StreamToRelationOp<I, W> link(ContinuousQueryExecution<I, W, ?, ?> context) {
-        return s2r.link(context);
+    public StreamToRelationOp<I, W> subscribe(ContinuousQueryExecution<I, W, ?, ?> context) {
+        return s2r.subscribe(context);
     }
 
     @Override

@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
 import org.streamreasoning.rsp4j.api.exceptions.OutOfOrderElementException;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.ObservableStreamToRelationOp;
+import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.PublisherStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.StreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.Window;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.WindowImpl;
@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 //TODO rename as C-SPARQL window operator
-public class CQELSTimeWindowOperatorBinding<T1, T2> extends ObservableStreamToRelationOp<T1, T2> {
+public class CQELSTimeWindowOperatorBinding<T1, T2> extends PublisherStreamToRelationOp<T1, T2> {
 
     private static final Logger log = Logger.getLogger(CQELSTimeWindowOperatorBinding.class);
     private final long a;
@@ -135,8 +135,8 @@ public class CQELSTimeWindowOperatorBinding<T1, T2> extends ObservableStreamToRe
     }
 
     @Override
-    public StreamToRelationOp<T1, T2> link(ContinuousQueryExecution context) {
-        this.addObserver((Observer) context);
+    public StreamToRelationOp<T1, T2> subscribe(ContinuousQueryExecution context) {
+        this.subscribe(context);
         return this;
     }
 

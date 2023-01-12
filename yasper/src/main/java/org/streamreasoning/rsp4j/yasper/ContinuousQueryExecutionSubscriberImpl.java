@@ -79,7 +79,7 @@ public class ContinuousQueryExecutionSubscriberImpl<I, W, R, O> extends Continuo
 
     @Override
     public void add(StreamToRelationOp<I, W> op) {
-        op.link(this);
+        op.subscribe(this);
     }
 
 //    @Override

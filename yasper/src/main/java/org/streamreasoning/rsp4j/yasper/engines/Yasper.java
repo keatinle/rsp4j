@@ -19,7 +19,7 @@ import org.streamreasoning.rsp4j.api.secret.report.Report;
 import org.streamreasoning.rsp4j.api.secret.time.Time;
 import org.streamreasoning.rsp4j.api.secret.time.TimeImpl;
 import org.streamreasoning.rsp4j.api.stream.data.DataStream;
-import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionObserverImpl;
+import org.streamreasoning.rsp4j.yasper.ContinuousQueryExecutionSubscriberImpl;
 import org.streamreasoning.rsp4j.yasper.content.BindingContentFactory;
 import org.streamreasoning.rsp4j.yasper.content.GraphContentFactory;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
@@ -105,7 +105,7 @@ public class Yasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrati
 
         DataStream<Binding> out = new StreamImpl<Binding>(q.getID());
 
-        ContinuousQueryExecution<Graph, Graph, Binding, Binding> cqe = new ContinuousQueryExecutionObserverImpl<Graph, Graph, Binding, Binding>(sds, q, out, q.r2r(), q.r2s());
+        ContinuousQueryExecution<Graph, Graph, Binding, Binding> cqe = new ContinuousQueryExecutionSubscriberImpl<>(sds, q, out, q.r2r(), q.r2s());
 
         Map<? extends WindowNode, DataStream<Graph>> windowMap = q.getWindowMap();
 
@@ -114,7 +114,7 @@ public class Yasper implements QueryRegistrationFeature<RSPQL>, StreamRegistrati
                 //TODO switch to parametric method WindowNode.params() for the simple ones
                 //TODO for the BGP aware windows, we need to extract bgp from R2R and push them to the window, therefore we need a way to visualize the r2r tree
                 StreamToRelationOp<Graph, Graph> build = wf.build(wo.getRange(), wo.getStep(), wo.getT0());
-                StreamToRelationOp<Graph, Graph> wop = build.link(cqe);
+                StreamToRelationOp<Graph, Graph> wop = build.subscribe(cqe);
                 TimeVarying<Graph> tvg = wop.apply(s);
                 if (wo.named()) {
                     if (wo.named()) {

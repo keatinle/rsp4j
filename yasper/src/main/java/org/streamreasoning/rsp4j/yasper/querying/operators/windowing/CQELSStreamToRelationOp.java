@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
 import org.streamreasoning.rsp4j.api.exceptions.OutOfOrderElementException;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.ObservableStreamToRelationOp;
+import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.PublisherStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.StreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.Window;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.WindowImpl;
@@ -19,10 +19,11 @@ import org.streamreasoning.rsp4j.api.stream.data.DataStream;
 import org.streamreasoning.rsp4j.yasper.sds.TimeVaryingObject;
 
 import java.util.*;
+import java.util.concurrent.Flow;
 import java.util.stream.Collectors;
 
 //TODO rename as C-SPARQL window operator
-public class CQELSStreamToRelationOp<T1, T2> extends ObservableStreamToRelationOp<T1, T2> {
+public class CQELSStreamToRelationOp<T1, T2> extends PublisherStreamToRelationOp<T1, T2> {
 
     private static final Logger log = Logger.getLogger(CQELSStreamToRelationOp.class);
     private final long a;
@@ -135,11 +136,11 @@ public class CQELSStreamToRelationOp<T1, T2> extends ObservableStreamToRelationO
     }
 
     @Override
-    public StreamToRelationOp<T1, T2> link(ContinuousQueryExecution<T1, T2, ?, ?> context) {
-        this.addObserver((Observer) context);
+    public StreamToRelationOp<T1, T2> subscribe(ContinuousQueryExecution<T1, T2, ?, ?> context) {
+//        this.addObserver((Observer) context);
+        this.subscribe((Flow.Subscriber<? super Content<T1, T2>>) context);
         return this;
     }
-
 
     @Override
     public TimeVarying<T2> get() {
@@ -152,5 +153,8 @@ public class CQELSStreamToRelationOp<T1, T2> extends ObservableStreamToRelationO
         return new TimeVaryingObject(this, iri);
     }
 
+    public void subscribe(Flow.Subscriber subscriber) {
+        this.subscribe(subscriber);
+    }
 }
 

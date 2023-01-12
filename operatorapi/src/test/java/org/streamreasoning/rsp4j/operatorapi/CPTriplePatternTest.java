@@ -4,12 +4,6 @@ import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
-import org.streamreasoning.rsp4j.operatorapi.functions.AggregationFunctionRegistry;
-import org.streamreasoning.rsp4j.operatorapi.functions.CountFunction;
-import org.streamreasoning.rsp4j.operatorapi.table.BindingStream;
-import org.streamreasoning.rsp4j.operatorapi.triplepattern.ContinuousTriplePatternQuery;
-import org.streamreasoning.rsp4j.operatorapi.triplepattern.TriplePatternR2R;
-import org.streamreasoning.rsp4j.operatorapi.utils.DummyConsumer;
 import org.streamreasoning.rsp4j.api.RDFUtils;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
@@ -24,6 +18,12 @@ import org.streamreasoning.rsp4j.api.secret.report.strategies.OnWindowClose;
 import org.streamreasoning.rsp4j.api.secret.time.Time;
 import org.streamreasoning.rsp4j.api.secret.time.TimeImpl;
 import org.streamreasoning.rsp4j.api.stream.data.DataStream;
+import org.streamreasoning.rsp4j.operatorapi.functions.AggregationFunctionRegistry;
+import org.streamreasoning.rsp4j.operatorapi.functions.CountFunction;
+import org.streamreasoning.rsp4j.operatorapi.table.BindingStream;
+import org.streamreasoning.rsp4j.operatorapi.triplepattern.ContinuousTriplePatternQuery;
+import org.streamreasoning.rsp4j.operatorapi.triplepattern.TriplePatternR2R;
+import org.streamreasoning.rsp4j.operatorapi.utils.DummyConsumer;
 import org.streamreasoning.rsp4j.yasper.content.GraphContentFactory;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
 import org.streamreasoning.rsp4j.yasper.querying.operators.Rstream;
@@ -76,8 +76,7 @@ public class CPTriplePatternTest {
 
         Time instance = new TimeImpl(0);
 
-        StreamToRelationOp<Graph, Graph> build = new CSPARQLStreamToRelationOp<Graph, Graph>(RDFUtils.createIRI("w1"), 2000, 2000, instance, tick, report, report_grain, new GraphContentFactory(instance));
-
+        StreamToRelationOp<Graph, Graph> build = new CSPARQLStreamToRelationOp<Graph, Graph>(RDFUtils.createIRI("w1"), 2000, 2000,  instance, tick, report, report_grain, new GraphContentFactory(instance));
 
         //R2R
         ContinuousTriplePatternQuery q = new ContinuousTriplePatternQuery("q1", "stream1", "?green rdf:type <http://color#Green>");
@@ -130,7 +129,7 @@ public class CPTriplePatternTest {
         //WINDOW DECLARATION
         Time instance = new TimeImpl(0);
 
-        StreamToRelationOp<Graph, Graph> build = new CSPARQLStreamToRelationOp<Graph, Graph>(RDFUtils.createIRI("w1"), 2000, 2000, instance, tick, report, report_grain, new GraphContentFactory(instance));
+        StreamToRelationOp<Graph, Graph> build = new CSPARQLStreamToRelationOp<>(RDFUtils.createIRI("w1"), 2000, 2000, instance, tick, report, report_grain, new GraphContentFactory(instance));
 
         //R2R
         ContinuousTriplePatternQuery q = new ContinuousTriplePatternQuery("q1", "stream1", "?green rdf:type <http://color#Green>");
@@ -345,7 +344,7 @@ public class CPTriplePatternTest {
                 .out(query.getOutputStream())
                 .build();
 
-        r2r.link(cp); //TODO make sure the R2R is linked in the CP
+        r2r.subscribe(cp); //TODO make sure the R2R is linked in the CP
 
         DummyConsumer<Binding> dummyConsumer = new DummyConsumer<>();
 
@@ -403,7 +402,7 @@ public class CPTriplePatternTest {
                 .out(outStream)
                 .build();
 
-        r2r.link(cp); //TODO make sure the r2r is linked in the CP
+        r2r.subscribe(cp); //TODO make sure the r2r is linked in the CP
 
         DummyConsumer<Binding> dummyConsumer = new DummyConsumer<>();
 

@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import org.streamreasoning.rsp4j.api.enums.ReportGrain;
 import org.streamreasoning.rsp4j.api.enums.Tick;
 import org.streamreasoning.rsp4j.api.exceptions.OutOfOrderElementException;
-import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.ObservableStreamToRelationOp;
+import org.streamreasoning.rsp4j.api.operators.s2r.execution.assigner.PublisherStreamToRelationOp;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.Window;
 import org.streamreasoning.rsp4j.api.operators.s2r.execution.instance.WindowImpl;
 import org.streamreasoning.rsp4j.api.querying.ContinuousQueryExecution;
@@ -18,9 +18,10 @@ import org.streamreasoning.rsp4j.api.stream.data.DataStream;
 import org.streamreasoning.rsp4j.yasper.sds.TimeVaryingObject;
 
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class CSPARQLStreamToRelationOp<I, W> extends ObservableStreamToRelationOp<I, W> {
+public class CSPARQLStreamToRelationOp<I, W> extends PublisherStreamToRelationOp<I, W> implements Flow.Publisher {
 
     private static final Logger log = Logger.getLogger(CSPARQLStreamToRelationOp.class);
     private final long width, slide;
@@ -128,6 +129,8 @@ public class CSPARQLStreamToRelationOp<I, W> extends ObservableStreamToRelationO
     public Content<I, W> compute(long t_e, Window w) {
         Content<I, W> content = getWindowContent(w);
         time.setAppTime(t_e);
+
+        submit(t_e);
         return setVisible(t_e, w, content);
     }
 
@@ -136,8 +139,10 @@ public class CSPARQLStreamToRelationOp<I, W> extends ObservableStreamToRelationO
     }
 
     @Override
-    public CSPARQLStreamToRelationOp<I, W> link(ContinuousQueryExecution<I, W, ?, ?> context) {
-        this.addObserver((Observer) context);
+    public CSPARQLStreamToRelationOp<I, W> subscribe(ContinuousQueryExecution<I, W, ?, ?> context) {
+        Flow.Subscriber castContext = (Flow.Subscriber<? super Content<I, W>>) context;
+        this.subscribe(castContext);
+
         return this;
     }
 
@@ -152,6 +157,5 @@ public class CSPARQLStreamToRelationOp<I, W> extends ObservableStreamToRelationO
     public TimeVarying<W> get() {
         return new TimeVaryingObject<>(this, iri);
     }
-
 
 }

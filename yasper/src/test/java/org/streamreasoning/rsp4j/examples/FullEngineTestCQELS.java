@@ -13,6 +13,7 @@ import org.streamreasoning.rsp4j.api.querying.ContinuousQueryExecution;
 import org.streamreasoning.rsp4j.api.secret.time.Time;
 import org.streamreasoning.rsp4j.yasper.engines.Yasper;
 import org.streamreasoning.rsp4j.yasper.examples.RDFStream;
+import org.streamreasoning.rsp4j.yasper.querying.formatter.InstResponseSysOutFormatter;
 import org.streamreasoning.rsp4j.yasper.querying.operators.Rstream;
 import org.streamreasoning.rsp4j.yasper.querying.operators.r2r.*;
 import org.streamreasoning.rsp4j.yasper.querying.operators.windowing.WindowNodeImpl;
@@ -69,7 +70,7 @@ public class FullEngineTestCQELS {
         cqe.outstream().addConsumer(new TestConsumer(results));
 
 
-//        cqe.outstream().addConsumer(new InstResponseSysOutFormatter("TTL", true));
+        cqe.outstream().addConsumer(new InstResponseSysOutFormatter("TTL", true));
 
         //RUNTIME DATA
 
